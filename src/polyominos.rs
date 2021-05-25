@@ -38,14 +38,12 @@ impl Polyomino {
         }
     }
 
+    #[inline]
     pub fn size(&self) -> u8 {
         self.coords.len() as u8
     }
 
-    pub fn signed_size(&self) -> i8 {
-        self.coords.len() as i8
-    }
-
+    #[inline]
     pub fn coords(&self) -> impl Iterator<Item = &(i8, i8)> {
         self.coords.iter()
     }
