@@ -4,13 +4,12 @@ mod board;
 mod symmetry;
 use polyominos::Polyomino;
 use board::Board;
+use std::env;
 
 use std::collections::BTreeSet;
 
 const MAX_ONES_OR_TWOS: u8 = 1;
 const MAX_THREES: u8 = 2;
-const WIDTH: usize = 6;
-const HEIGHT: usize = 6;
 
 #[derive(Debug, Clone)]
 struct RestrictedBoard {
@@ -54,8 +53,18 @@ impl RestrictedBoard {
 }
 
 fn main() {
-    let mut stack = vec![RestrictedBoard::new(WIDTH, HEIGHT)];
+    let mut stack = vec![];
     let mut completed_boards = BTreeSet::new();
+
+    let args: Vec<_> = env::args().collect();
+    if args.len() != 3 {
+        println!("Usage:\npolyomino-generator WIDTH HEIGHT");
+        std::process::exit(1);
+    }
+    let width: usize = args[1].parse().unwrap();
+    let height: usize = args[2].parse().unwrap();
+
+    stack.push(RestrictedBoard::new(width, height));
 
     while let Some(board) = stack.pop() {
         for polyomino in polyominos::ALL_POLYOMINOS.iter() {

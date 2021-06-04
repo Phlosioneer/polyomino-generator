@@ -234,6 +234,7 @@ fn adjacent_coords(polyomino: &[(i8, i8)]) -> Vec<(i8, i8)> {
 }
 
 #[allow(unused_imports)]
+#[cfg(test)]
 mod test {
     use super::*;
 

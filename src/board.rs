@@ -1,14 +1,14 @@
 
 use std::cmp::Ordering;
 
-use crate::polyominos::{Polyomino, ALL_POLYOMINOS};
+use crate::polyominos::Polyomino;
 use crate::symmetry::Symmetry;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Ord)]
 pub struct Solution(Vec<&'static Polyomino>);
 
 impl Solution {
-    fn new(mut inner: Vec<&'static Polyomino>) -> Solution {
+    fn new(inner: Vec<&'static Polyomino>) -> Solution {
         Solution(inner)
     }
 }
@@ -179,6 +179,10 @@ impl Board {
             self.get(x, y).unwrap().unwrap()
         };
 
+        if self.width != self.height {
+            assert_eq!(symmetry.diagonal, false);
+        }
+
         let mut indices = Vec::with_capacity(self.polyominos.len());
         for y in 0..self.height {
             for x in 0..self.width {
@@ -207,6 +211,9 @@ impl Board {
 
         let mut best_solution = None;
         for symmetry in Symmetry::ALL_SYMMETRIES {
+            if self.width != self.height && symmetry.diagonal {
+                continue;
+            }
             let current_solution = self.symmetric_board_polyominos(symmetry);
             if let Some(ref mut best_solution) = best_solution {
                 if &current_solution < best_solution {
@@ -221,8 +228,10 @@ impl Board {
 }
 
 #[allow(unused_imports)]
+#[cfg(test)]
 mod test {
     use super::*;
+    use crate::polyominos::ALL_POLYOMINOS;
 
     fn find_poly(coords: Vec<(i8, i8)>) -> &'static Polyomino {
         for poly in ALL_POLYOMINOS.iter() {
