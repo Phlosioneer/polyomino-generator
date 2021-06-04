@@ -1,13 +1,16 @@
 
 mod polyominos;
 mod board;
+mod symmetry;
 use polyominos::Polyomino;
 use board::Board;
 
+use std::collections::BTreeSet;
+
 const MAX_ONES_OR_TWOS: u8 = 1;
 const MAX_THREES: u8 = 2;
-const WIDTH: usize = 5;
-const HEIGHT: usize = 5;
+const WIDTH: usize = 6;
+const HEIGHT: usize = 6;
 
 #[derive(Debug, Clone)]
 struct RestrictedBoard {
@@ -44,46 +47,39 @@ impl RestrictedBoard {
             RestrictedBoard { inner, one_or_two_sized_count, three_sized_count }
         })
     }
-}
 
-/// Pass-through functions
-impl RestrictedBoard {
-    #[inline]
-    pub fn is_full(&self) -> bool {
-        self.inner.is_full()
-    }
-
-    #[inline]
-    pub fn to_string(&self) -> String {
-        self.inner.to_string()
+    pub fn board(&self) -> &Board {
+        &self.inner
     }
 }
 
 fn main() {
     let mut stack = vec![RestrictedBoard::new(WIDTH, HEIGHT)];
-    let mut completed_boards = Vec::new();
+    let mut completed_boards = BTreeSet::new();
 
     while let Some(board) = stack.pop() {
         for polyomino in polyominos::ALL_POLYOMINOS.iter() {
             if let Some(new_board) = board.add_clone(polyomino) {
-                if new_board.is_full() {
-                    completed_boards.push(new_board);
-                    let should_print;
-                    if completed_boards.len() < 10 {
-                        should_print = true;
-                    } else if completed_boards.len() < 100 {
-                        should_print = completed_boards.len() % 10 == 0;
-                    } else if completed_boards.len() < 1000 {
-                        should_print = completed_boards.len() % 100 == 0;
-                    } else if completed_boards.len() < 10000 {
-                        should_print = completed_boards.len() % 1000 == 0;
-                    } else if completed_boards.len() < 100000 {
-                        should_print = completed_boards.len() % 10000 == 0;
-                    } else {
-                        should_print = completed_boards.len() % 100000 == 0;
-                    }
-                    if should_print {
-                        println!("{}", completed_boards.len());
+                if new_board.board().is_full() {
+                    let changed = completed_boards.insert(new_board.board().cannonical_form());
+                    if changed {
+                        let should_print;
+                        if completed_boards.len() < 10 {
+                            should_print = true;
+                        } else if completed_boards.len() < 100 {
+                            should_print = completed_boards.len() % 10 == 0;
+                        } else if completed_boards.len() < 1000 {
+                            should_print = completed_boards.len() % 100 == 0;
+                        } else if completed_boards.len() < 10000 {
+                            should_print = completed_boards.len() % 1000 == 0;
+                        } else if completed_boards.len() < 100000 {
+                            should_print = completed_boards.len() % 10000 == 0;
+                        } else {
+                            should_print = completed_boards.len() % 100000 == 0;
+                        }
+                        if should_print {
+                            println!("{}", completed_boards.len());
+                        }
                     }
                 } else {
                     stack.push(new_board);
@@ -92,8 +88,8 @@ fn main() {
         }
     }
 
-    //for board in completed_boards {
-    //   println!("----\n{}\n----\n\n", board.to_string());
+    //for solution in &completed_boards {
+       //println!("----\n{}\n----\n\n", Board::from_solution(WIDTH, HEIGHT, &solution).to_string());
     //}
     println!("{}", completed_boards.len());
 }
